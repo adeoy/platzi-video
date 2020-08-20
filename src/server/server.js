@@ -2,14 +2,14 @@ import express from 'express';
 import webpack from 'webpack';
 import helmet from 'helmet';
 
-import config from './config';
-
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import { StaticRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
+
+import config from './config';
 
 import serverRoutes from '../frontend/routes/serverRoutes';
 
@@ -70,7 +70,7 @@ const setResponse = (html, preloadedState, manifest) => {
 
     </html>
     `);
-}
+};
 
 const renderApp = (req, res) => {
   const store = createStore(reducer, initialState);
