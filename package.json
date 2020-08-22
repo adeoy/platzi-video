@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node src/server/index",
     "dev": "nodemon src/server/index",
     "build": "webpack-cli --config webpack.config.js --colors",
     "lint": "eslint src/frontend/ --ext .js --ext .jsx --fix",

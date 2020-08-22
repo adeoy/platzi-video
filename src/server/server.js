@@ -19,15 +19,13 @@ import boom from '@hapi/boom';
 import passport from 'passport';
 import axios from 'axios';
 
-import config from './config';
-
 import serverRoutes from '../frontend/routes/serverRoutes';
 
 import reducer from '../frontend/reducers';
 
 import getManifest from './getManifest';
 
-const { ENV, PORT } = config;
+const [ENV, PORT] = [process.env.ENV, 3000];
 
 const app = express();
 
