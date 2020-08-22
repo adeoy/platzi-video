@@ -40,7 +40,7 @@ const Header = (props) => {
           {hasUser ? (
             <img src={gravatar(user.email)} alt={user.email} />
           ) : (
-              <img src={userIcon} alt='User profile' />
+            <img src={userIcon} alt='User profile' />
             )}
           <p>Perfil</p>
         </div>
@@ -57,9 +57,9 @@ const Header = (props) => {
               </Link>
             </li>
           ) : (
-              <li>
-                <Link to='/login'>Iniciar Sesión</Link>
-              </li>
+            <li>
+              <Link to='/login'>Iniciar Sesión</Link>
+            </li>
             )}
         </ul>
       </div>
