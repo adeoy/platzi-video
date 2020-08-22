@@ -17,6 +17,7 @@ const CarouselItem = (props) => {
 
   const handleSetFavorite = () => {
     const userId = getCookie('id');
+
     props.addFavorite({
       userId,
       movieId: _id,
@@ -32,7 +33,7 @@ const CarouselItem = (props) => {
   };
 
   const handleDelFavorite = () => {
-    props.removeFavorite({userMovieId, id});
+    props.removeFavorite({ userMovieId, id });
   };
 
   return (
@@ -55,12 +56,12 @@ const CarouselItem = (props) => {
               onClick={handleSetFavorite}
             />
           ) : (
-            <img
-              className='carousel-item__details--img'
-              src={removeIcon}
-              alt='Remove Icon'
-              onClick={handleDelFavorite}
-            />
+              <img
+                className='carousel-item__details--img'
+                src={removeIcon}
+                alt='Remove Icon'
+                onClick={handleDelFavorite}
+              />
             )}
         </div>
         <p className='carousel-item__details--title'>{title}</p>
