@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { setFavorite, delFavorite } from '../actions';
+import { addFavorite, removeFavorite } from '../actions';
+import getCookie from '../utils/getCookie';
 
 import '../assets/styles/components/CarouselItem.scss';
 
@@ -12,21 +13,26 @@ import plusIcon from '../assets/static/plus-icon.png';
 import removeIcon from '../assets/static/remove-icon.png';
 
 const CarouselItem = (props) => {
-  const { id, cover, title, year, contentRating, duration, isList } = props;
+  const { userMovieId, _id, id, cover, title, year, contentRating, duration, isList } = props;
 
   const handleSetFavorite = () => {
-    props.setFavorite({
-      id,
-      cover,
-      title,
-      year,
-      contentRating,
-      duration,
+    const userId = getCookie('id');
+    props.addFavorite({
+      userId,
+      movieId: _id,
+      movie: {
+        id,
+        cover,
+        title,
+        year,
+        contentRating,
+        duration,
+      }
     });
   };
 
   const handleDelFavorite = () => {
-    props.delFavorite(id);
+    props.removeFavorite({userMovieId, id});
   };
 
   return (
@@ -55,7 +61,7 @@ const CarouselItem = (props) => {
               alt='Remove Icon'
               onClick={handleDelFavorite}
             />
-          )}
+            )}
         </div>
         <p className='carousel-item__details--title'>{title}</p>
         <p className='carousel-item__details--subtitle'>
@@ -73,18 +79,21 @@ const CarouselItem = (props) => {
 };
 
 CarouselItem.propTypes = {
-  id: PropTypes.number,
+  _id: PropTypes.string,
+  id: PropTypes.string,
   cover: PropTypes.string,
   title: PropTypes.string,
   year: PropTypes.number,
   contentRating: PropTypes.string,
   duration: PropTypes.number,
   isList: PropTypes.bool,
+  addFavorite: PropTypes.func,
+  removeFavorite: PropTypes.func,
 };
 
 const mapDispatchToProps = {
-  setFavorite,
-  delFavorite,
+  addFavorite,
+  removeFavorite,
 };
 
 export default connect(null, mapDispatchToProps)(CarouselItem);

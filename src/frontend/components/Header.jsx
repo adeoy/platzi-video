@@ -17,7 +17,12 @@ const Header = (props) => {
   const hasUser = Object.keys(user).length > 0;
 
   const handleLogout = () => {
+    const cookies = ['email', 'name', 'id', 'token'];
+    cookies.forEach(cookie => {
+      document.cookie = `${cookie}=`;
+    });
     props.logoutRequest({});
+    window.location.href = '/login';
   };
 
   const headerClass = classNames('header', {
@@ -35,8 +40,8 @@ const Header = (props) => {
           {hasUser ? (
             <img src={gravatar(user.email)} alt={user.email} />
           ) : (
-            <img src={userIcon} alt='User profile' />
-          )}
+              <img src={userIcon} alt='User profile' />
+            )}
           <p>Perfil</p>
         </div>
         <ul>
@@ -52,10 +57,10 @@ const Header = (props) => {
               </Link>
             </li>
           ) : (
-            <li>
-              <Link to='/login'>Iniciar Sesión</Link>
-            </li>
-          )}
+              <li>
+                <Link to='/login'>Iniciar Sesión</Link>
+              </li>
+            )}
         </ul>
       </div>
     </header>

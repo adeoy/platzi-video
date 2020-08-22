@@ -7,13 +7,14 @@ import { findVideo } from '../actions';
 
 import '../assets/styles/components/Search.scss';
 
-const Search = ({ isHome, findVideo }) => {
+const Search = (props) => {
+  const { isHome } = props;
   const inputStyle = classNames('input', {
     isHome,
   });
 
   const handleFindVideo = (e) => {
-    findVideo(e.target.value.toLowerCase());
+    props.findVideo(e.target.value.toLowerCase());
   };
 
   return (

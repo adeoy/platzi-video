@@ -8,6 +8,7 @@ const useInitialState = (API) => {
   });
 
   useEffect(() => {
+    // eslint-disable-next-line no-undef
     fetch(API)
       .then(resp => resp.json())
       .then(data => setVideos(data));

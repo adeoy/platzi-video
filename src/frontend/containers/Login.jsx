@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
-import { loginRequest } from '../actions';
+import { loginUser } from '../actions';
 
 import Header from '../components/Header';
 
@@ -14,19 +15,20 @@ import twitterIcon from '../assets/static/twitter-icon.png';
 const Login = (props) => {
   const [form, setValues] = useState({
     email: '',
+    password: '',
+    rememberMe: false,
   });
 
-  const handleInput = (e) => {
+  const handleInput = (e, type = 'value') => {
     setValues({
       ...form,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target[type],
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    props.loginRequest(form);
-    props.history.push('/');
+    props.loginUser(form, '/');
   };
 
   return (
@@ -52,10 +54,10 @@ const Login = (props) => {
               onChange={handleInput}
             />
 
-            <button type='button' className='button'>Iniciar sesión</button>
+            <button type='submit' className='button'>Iniciar sesión</button>
             <div className='login__container--remember-me'>
               <label htmlFor='cbox1'>
-                <input type='checkbox' id='cbox1' value='first_checkbox' />
+                <input type='checkbox' id='cbox1' name="rememberMe" onChange={(e) => handleInput(e, 'checked')} />
                 Recuérdame
               </label>
               <a href='/'>Olvidé mi contraseña</a>
@@ -85,7 +87,11 @@ const Login = (props) => {
 };
 
 const mapDispatchToProps = {
-  loginRequest,
+  loginUser,
 };
+
+Login.propTypes = {
+  loginUser: PropTypes.func,
+}
 
 export default connect(null, mapDispatchToProps)(Login);

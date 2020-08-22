@@ -10,14 +10,14 @@ import Player from '../containers/Player';
 
 import NotFound from '../containers/NotFound';
 
-const App = () => (
+const App = ({ isLogged }) => (
   <Router>
     <Layout>
       <Switch>
-        <Route exact path='/' component={Home} />
+        <Route exact path='/' component={isLogged ? Home : Login} />
         <Route exact path='/login' component={Login} />
         <Route exact path='/register' component={Register} />
-        <Route exact path='/player/:id' component={Player} />
+        <Route exact path='/player/:id' component={isLogged ? Player : Login} />
 
         <Route component={NotFound} />
       </Switch>

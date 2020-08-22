@@ -1,3 +1,8 @@
+/* eslint-disable global-require */
+/* eslint-disable no-console */
+/* eslint-disable consistent-return */
+/* eslint-disable func-names */
+
 import express from 'express';
 import webpack from 'webpack';
 import helmet from 'helmet';
@@ -9,17 +14,29 @@ import { createStore } from 'redux';
 import { StaticRouter } from 'react-router-dom';
 import { renderRoutes } from 'react-router-config';
 
+import cookieParser from 'cookie-parser';
+import boom from '@hapi/boom';
+import passport from 'passport';
+import axios from 'axios';
+
 import config from './config';
 
 import serverRoutes from '../frontend/routes/serverRoutes';
 
 import reducer from '../frontend/reducers';
-import initialState from '../frontend/initialState';
 
 import getManifest from './getManifest';
 
 const { ENV, PORT } = config;
+
 const app = express();
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(passport.initialize());
+app.use(passport.session());
+
+require('./utils/auth/strategies/basic');
 
 if (ENV === 'development') {
   console.log('Development config...');
@@ -72,18 +89,173 @@ const setResponse = (html, preloadedState, manifest) => {
     `);
 };
 
-const renderApp = (req, res) => {
+const renderApp = async (req, res) => {
+  let initialState;
+  const { email, name, id, token } = req.cookies;
+
+  try {
+    let movieList = await axios({
+      url: `${process.env.API_URL}/api/movies`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'get',
+    });
+    movieList = movieList.data.data;
+
+    let myList = await axios({
+      url: `${process.env.API_URL}/api/user-movies?userId=${id}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'get',
+    });
+
+    myList = myList.data.data;
+    myList = myList.map((item) => {
+      let nuevo = item;
+      for (let i = 0; i < movieList.length; i += 1) {
+        const movie = movieList[i];
+        if (movie._id === item.movieId) {
+          nuevo = {...movie, userMovieId: item._id}
+        }
+      }
+      return nuevo;
+    });
+
+    initialState = {
+      user: { email, name, id },
+      playing: {},
+      myList,
+      trends: movieList.filter(movie => movie.contentRating === 'PG' && movie._id),
+      originals: movieList.filter(movie => movie.contentRating === 'G' && movie._id),
+      searchResults: [],
+    };
+  } catch (err) {
+    initialState = {
+      user: {},
+      playing: {},
+      myList: [],
+      trends: [],
+      originals: [],
+      searchResults: [],
+    };
+  }
+
   const store = createStore(reducer, initialState);
   const preloadedState = store.getState();
+  const isLogged = (initialState.user.id);
+
   const html = renderToString(
     <Provider store={store}>
       <StaticRouter location={req.url} context={{}}>
-        {renderRoutes(serverRoutes)}
+        {renderRoutes(serverRoutes(isLogged))}
       </StaticRouter>
     </Provider>
   );
   res.send(setResponse(html, preloadedState, req.hashManifest));
 }
+
+const THIRTY_DAYS_IN_SEC = 2592000000;
+const TWO_HOURS_IN_SEC = 7200000;
+
+app.post("/auth/sign-in", async function (req, res, next) {
+  const { rememberMe } = req.body;
+
+  passport.authenticate('basic', (error, data) => {
+    try {
+      if (error || !data) {
+        next(boom.unauthorized());
+      }
+
+      req.login(data, { session: false }, async (err) => {
+        if (err) {
+          next(err);
+        }
+
+        const { token, ...user } = data;
+        res.cookie('token', token, {
+          httpOnly: !(ENV === 'development'),
+          secure: !(ENV === 'development'),
+          maxAge: rememberMe ? THIRTY_DAYS_IN_SEC : TWO_HOURS_IN_SEC,
+        });
+
+        res.status(200).json(user);
+      });
+    } catch (err) {
+      next(err);
+    }
+  })(req, res, next);
+});
+
+app.post("/auth/sign-up", async function (req, res, next) {
+  const { body: user } = req;
+
+  try {
+    const userData = await axios({
+      url: `${process.env.API_URL}/api/auth/sign-up`,
+      method: 'post',
+      data: {
+        email: user.email,
+        name: user.name,
+        password: user.password,
+      },
+    });
+
+    res.status(201).json({
+      name: req.body.name,
+      email: req.body.email,
+      id: userData.data.id,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+
+app.post("/user-movies", async function (req, res, next) {
+  try {
+    const { body: userMovie } = req;
+    const { token } = req.cookies;
+
+    const { data, status } = await axios({
+      url: `${process.env.API_URL}/api/user-movies`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'post',
+      data: userMovie,
+    });
+    if (status !== 201) {
+      return next(boom.badImplementation());
+    }
+    res.status(201).json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete("/user-movies/:userMovieId", async function (req, res, next) {
+  try {
+    const { userMovieId } = req.params;
+    const { token } = req.cookies;
+
+    const { data, status } = await axios({
+      url: `${process.env.API_URL}/api/user-movies/${userMovieId}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'delete'
+    });
+    if (status !== 200) {
+      return next(boom.badImplementation());
+    }
+    res.status(200).json(data);
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.get('*', renderApp);
 
@@ -91,6 +263,6 @@ app.listen(PORT, (err) => {
   if (err) {
     console.log(err);
   } else {
-    console.log('Server running at http://localhost:' + PORT + '/');
+    console.log(`Server running at http://localhost:${PORT}/`);
   }
 });

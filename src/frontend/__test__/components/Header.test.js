@@ -1,0 +1,27 @@
+import React from 'react';
+import { mount } from 'enzyme';
+import { create } from 'react-test-renderer';
+
+import Header from '../../components/Header';
+import ProviderMock from '../../__mocks__/ProviderMock';
+
+describe('<Header />', () => {
+  test('It should render logo', () => {
+    const header = mount(
+      <ProviderMock>
+        <Header />
+      </ProviderMock>
+    );
+    expect(header.find('.header__img')).toHaveLength(1);
+  });
+
+  test('Snapshot', () => {
+    const header1 = create(
+      <ProviderMock>
+        <Header />
+      </ProviderMock>
+    );
+    expect(header1.toJSON()).toMatchSnapshot();
+  })
+
+});

@@ -7,12 +7,13 @@ import NotFound from './NotFound';
 
 import '../assets/styles/containers/Player.scss';
 
-const Player = ({ playing, match, getVideoSource, history }) => {
+const Player = (props) => {
+  const { playing, match, history } = props;
   const { id } = match.params;
   const hasPlaying = Object.keys(playing).length > 0;
 
   useLayoutEffect(() => {
-    getVideoSource(id);
+    props.getVideoSource(id);
   }, []);
 
   return hasPlaying ? (
