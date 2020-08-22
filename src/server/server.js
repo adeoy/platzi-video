@@ -25,7 +25,7 @@ import reducer from '../frontend/reducers';
 
 import getManifest from './getManifest';
 
-const [ENV, PORT] = [process.env.ENV, 3000];
+const [ENV, PORT] = [process.env.ENV, process.env.PORT];
 
 const app = express();
 
