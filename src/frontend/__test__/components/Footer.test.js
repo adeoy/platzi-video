@@ -1,5 +1,5 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { create } from 'react-test-renderer';
 
 import Footer from '../../components/Footer';
@@ -18,6 +18,12 @@ describe('<Footer />', () => {
   test('Snapshot', () => {
     const footer1 = create(<Footer />);
     expect(footer1.toJSON()).toMatchSnapshot();
+  });
+
+  test('It should has class footer', () => {
+    const footer2 = shallow(<Footer />);
+    const elem = footer2.find('footer');
+    expect(elem.hasClass('footer')).toBe(true);
   })
 
 });
